@@ -25,11 +25,11 @@ Development Role: Customer**
    	 Customer is the main target user for this project.
    	 When using the app, customers need to:
    	   1.Register an account.
-   		 2.Login to the app.
-			 3.Browse the menu.
-			 4.Manage the shopping cart.
-			 5.Submit orders.
-			 6.View previous order records.
+   	   2.Login to the app.
+	   3.Browse the menu.
+       4.Manage the shopping cart.
+	   5.Submit orders.
+	   6.View previous order records.
 	 3.2 Admin
 		 This project will mainly focus on the customer side of the application. Admin functions are not the main development priority.
 
@@ -57,9 +57,9 @@ Development Role: Customer**
    FR-05	Customers can submit orders and receive order confirmation information.(Must)
    FR-06	Customers can view order history and current order status.(Must)
    FR-07	Customers can search or filter menu products.(Should)
-	 FR-08	Customers can submit ratings and text reviews.(Could)
+   FR-08	Customers can submit ratings and text reviews.(Could)
 		Priority Explanation:
-			Must: Core functions that must be completed in this project.
+		Must: Core functions that must be completed in this project.
    		Should: Important functions that are planned to be developed, but have lower priority than Must functions.
    		Could: Extra functions that may be developed if there is enough time.
    5.2 Non-functional Requirements
@@ -77,12 +77,12 @@ Development Role: Customer**
    		Item ID - A unique ID to identify each product.
    		Item Name - The name of the product.
    		Item Description - Description of the product.
-			Item Price - The price of the product.
-			Availability Status - Shows if the product is available to purchase.
+		Item Price - The price of the product.
+		Availability Status - Shows if the product is available to purchase.
    6.3 Order
    		Order ID - A unique ID to identify each order.
-  	  Customer ID - Identifies the customer who placed the order.
-			Order Items - Products included in the order and their quantities.
+  	  	Customer ID - Identifies the customer who placed the order.
+		Order Items - Products included in the order and their quantities.
    		Total Price - The total price of the order.
    		Order Status - For example: Pending, Preparing, Ready for Pickup or Completed.
    		Order Time - Date and time when the order was created.
@@ -232,8 +232,8 @@ prd版本：v1.0
 8. 验收标准(Acceptance criteria)
    AC-01：用户注册：
     前提：用户尚未注册，并且提供了有效的注册信息
-		操作：用户提交注册表单
-	  预期结果：
+	操作：用户提交注册表单
+    预期结果：
    		系统成功创建用户账户
    		应用显示注册成功提示
    		如果邮箱已经注册过，应用应显示错误信息，并阻止重复账户的创建
@@ -251,11 +251,11 @@ prd版本：v1.0
    		商品数量根据用户的增加和减少更新
    		购物车总价根据商品价格和数量正确计算
    		用户可以移除购物车中的商品
-	 AC-04：提交订单
-		前提：用户的购物车中存在有效商品
-		操作： 用户确认并提交订单
-		预期结果：
-			系统成功创建订单
+	AC-04：提交订单
+      前提：用户的购物车中存在有效商品
+	  操作： 用户确认并提交订单 
+	  预期结果：
+		系统成功创建订单 
    		应用显示订单确认信息
    		订单包含正确的商品、数量和总价
    		如果订单提交失败，应用显示明确的错误信息  
