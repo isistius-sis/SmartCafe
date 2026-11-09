@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "474542107803",
+    "project_id": "smartcafe-7be0b",
+    "storage_bucket": "smartcafe-7be0b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:474542107803:android:540fc3ff5f966f8cdc6a3e",
+        "android_client_info": {
+          "package_name": "com.example.smartcafe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxwpjIDt7ntgZt0-QnZkqn58eQNBZxtbQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
