@@ -10,7 +10,13 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 
+
+/*
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
@@ -55,4 +61,92 @@ fun SmartCafeTheme(
         typography = Typography,
         content = content
     )
+}
+ */
+private val LightCoffeeScheme = lightColorScheme(
+    primary = CoffeeBrown,
+    onPrimary = Color.White,
+    primaryContainer = CoffeeContainer,
+    onPrimaryContainer = CoffeeText,
+
+    secondary = CoffeeSecondary,
+    onSecondary = Color.White,
+    secondaryContainer = CoffeeLatte,
+    onSecondaryContainer = CoffeeText,
+
+    background = CoffeeCream,
+    onBackground = CoffeeText,
+
+    surface = CoffeeSurface,
+    onSurface = CoffeeText,
+    surfaceVariant = CoffeeSoftSurface,
+    onSurfaceVariant = CoffeeMutedText,
+
+    surfaceContainerLowest = CoffeeSurface,
+    surfaceContainerLow = CoffeeCream,
+    surfaceContainer = CoffeeSoftSurface,
+    surfaceContainerHigh = CoffeeContainer,
+    surfaceContainerHighest = CoffeeContainer,
+
+    outline = CoffeeOutline,
+    error = Color(0xFFB3261E)
+)
+
+private val DarkCoffeeScheme = darkColorScheme(
+    primary = CoffeeDarkPrimary,
+    onPrimary = CoffeeDarkBackground,
+    primaryContainer = CoffeeBrown,
+    onPrimaryContainer = CoffeeDarkText,
+
+    secondary = CoffeeLatte,
+    onSecondary = CoffeeDarkBackground,
+
+    background = CoffeeDarkBackground,
+    onBackground = CoffeeDarkText,
+
+    surface = CoffeeDarkSurface,
+    onSurface = CoffeeDarkText,
+    surfaceVariant = Color(0xFF4B403A),
+    onSurfaceVariant = CoffeeLatte,
+
+    surfaceContainerLow = CoffeeDarkSurface,
+    surfaceContainer = Color(0xFF382F2A),
+    surfaceContainerHigh = Color(0xFF443832),
+    surfaceContainerHighest = Color(0xFF50423B),
+
+    outline = CoffeeOutline
+)
+
+@Composable
+fun SmartCafeTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit
+) {
+    val colorScheme = when {
+        dynamicColor &&
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+            val context = LocalContext.current
+            if (darkTheme) {
+                dynamicDarkColorScheme(context)
+            } else {
+                dynamicLightColorScheme(context)
+            }
+        }
+
+        darkTheme -> DarkCoffeeScheme
+        else -> LightCoffeeScheme
+    }
+
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = Typography
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            content()
+        }
+    }
 }
