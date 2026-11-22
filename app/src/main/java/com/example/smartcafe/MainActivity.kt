@@ -60,9 +60,21 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.DisposableEffect
+import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
 
 
 //测试邮箱：textext@email.com  密码：smartcafe
+//测试邮箱2：text2@email.com  密码：cafecafe
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,6 +99,13 @@ class MainActivity : ComponentActivity() {
             }//保存购物车商品的列表
             when{
                 isLoggedIn ->{
+                    val currentUserId = auth.currentUser?.uid
+                    if (currentUserId != null) {
+                        OrderStatusNotificationListener(
+                            db = db,
+                            userId = currentUserId
+                        )
+                    }
                     if (showOrders){
                         MyOrdersScreen(
                             db = db,
@@ -1125,7 +1144,58 @@ fun MyOrdersScreen(
     var reviewError by remember(userId) {
         mutableStateOf("")
     }//失败提示
+    /*val context = LocalContext.current
+    var notificationMessage by remember {
+        mutableStateOf("")
+    }
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { granted ->
 
+            notificationMessage = if (granted) {
+                val posted = showOrderStatusNotification(
+                    context = context,
+                    orderId = "TEST",
+                    status = "Preparing"
+                )
+
+                if (posted) {
+                    "Test notification posted. Check the notification shade."
+                } else {
+                    "Notifications are disabled in system settings."
+                }
+            } else {
+                "Notification permission was not granted."
+            }
+        }*/
+    val context = LocalContext.current
+    val notificationManager = context.getSystemService(
+        Context.NOTIFICATION_SERVICE
+    ) as NotificationManager
+    var hasNotificationPermission by remember {
+        mutableStateOf(
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                    context.checkSelfPermission(
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    var notificationMessage by remember {
+        mutableStateOf("")
+    }
+    val notificationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { granted ->
+            hasNotificationPermission = granted
+
+            notificationMessage = if (granted) {
+                "Order notifications enabled."
+            } else {
+                "Notification permission was not granted."
+            }
+        }
     DisposableEffect(userId, db) {
         val registration = if (userId.isBlank()) {
             orders = emptyList()
@@ -1150,7 +1220,6 @@ fun MyOrdersScreen(
                                 (exception.localizedMessage
                                     ?: "Please try again.")
                         isLoading = false
-
                     } else if (snapshot != null) {
                         val updatedOrders = snapshot.documents.map { document ->
                             OrderSummary(
@@ -1161,12 +1230,10 @@ fun MyOrdersScreen(
                                 createdAt = document
                                     .getTimestamp("createdAt")
                                     ?.toDate(),
-
                                 items = (document.get("items") as? List<*>)
                                     ?.mapNotNull { rawItem ->
                                         val fields = rawItem as? Map<*, *>
                                             ?: return@mapNotNull null
-
                                         OrderLine(
                                             itemId = fields["itemId"] as? String
                                                 ?: "Unknown",
@@ -1341,11 +1408,81 @@ fun MyOrdersScreen(
             }
         }
 
+
         Spacer(modifier = Modifier.height(16.dp))
+
+        /*TextButton(
+            onClick = {
+                if (
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    context.checkSelfPermission(
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    notificationPermissionLauncher.launch(
+                        Manifest.permission.POST_NOTIFICATIONS
+                    )
+                } else {
+                    val posted = showOrderStatusNotification(
+                        context = context,
+                        orderId = "TEST",
+                        status = "Preparing"
+                    )
+
+                    notificationMessage = if (posted) {
+                        "Test notification posted. Check the notification shade."
+                    } else {
+                        "Notifications are disabled in system settings."
+                    }
+                }
+            }
+        ) {
+            Text("Send Test Notification")
+        }
+        if (notificationMessage.isNotEmpty()) {
+            Text(
+                text = notificationMessage,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }*/
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !hasNotificationPermission
+        ) {
+            TextButton(
+                onClick = {
+                    notificationPermissionLauncher.launch(
+                        Manifest.permission.POST_NOTIFICATIONS
+                    )
+                }
+            ) {
+                Text("Enable Order Notifications")
+            }
+        } else {
+            Text(
+                text = if (notificationManager.areNotificationsEnabled()) {
+                    "Order notifications enabled."
+                } else {
+                    "Notifications are disabled in Android settings."
+                },
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
+        if (notificationMessage.isNotEmpty()) {
+            Text(
+                text = notificationMessage,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
 
         Button(onClick = onBackToMenu) {
             Text("Back to Menu")
         }
+
+        /*Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = onBackToMenu) {
+            Text("Back to Menu")
+        }*/
     }
     selectedOrder?.let { order ->
         AlertDialog(
@@ -1612,6 +1749,135 @@ fun MyOrdersScreen(
             }
         )
     }
-
 }
+
+@Composable
+fun OrderStatusNotificationListener(
+    db: FirebaseFirestore,
+    userId: String
+) {
+    val context = LocalContext.current.applicationContext
+    DisposableEffect(db, userId) {
+        val previousStatuses = mutableMapOf<String, String>()
+        var isFirstSnapshot = true
+        val registration = db.collection("users")
+            .document(userId)
+            .collection("orders")
+            .addSnapshotListener { snapshot, exception ->
+                if (exception != null) {
+                    Log.e(
+                        "SmartCafeNotifications",
+                        "Order status listener failed",
+                        exception
+                    )
+                    return@addSnapshotListener
+                }
+                if (snapshot != null) {
+                    val currentStatuses = snapshot.documents
+                        .mapNotNull { document ->
+                            document.getString("status")?.let { status ->
+                                document.id to status
+                            }
+                        }
+                        .toMap()
+
+                    if (!isFirstSnapshot) {
+                        currentStatuses.forEach { (orderId, newStatus) ->
+                            val oldStatus = previousStatuses[orderId]
+
+                            if (
+                                oldStatus != null &&
+                                oldStatus != newStatus
+                            ) {
+                                Log.d(
+                                    "SmartCafeNotifications",
+                                    "Order $orderId: $oldStatus -> $newStatus"
+                                )
+
+                                showOrderStatusNotification(
+                                    context = context,
+                                    orderId = orderId,
+                                    status = newStatus
+                                )
+                            }
+                        }
+                    }
+                    previousStatuses.clear()
+                    previousStatuses.putAll(currentStatuses)
+                    isFirstSnapshot = false
+                }
+            }
+        onDispose {
+            registration.remove()
+        }
+    }
+}
+
+@Suppress("DEPRECATION") //发送系统通知
+fun showOrderStatusNotification(
+    context: Context,
+    orderId: String,
+    status: String
+): Boolean {
+
+    val channelId = "smart_cafe_order_updates"
+
+    val manager = context.getSystemService(
+        Context.NOTIFICATION_SERVICE
+    ) as NotificationManager
+
+    // Create a notification channel on Android 8.0+.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(
+            channelId,
+            "Order Updates",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = "Notifications about order status changes"
+        }
+
+        manager.createNotificationChannel(channel)
+
+        if (manager.getNotificationChannel(channelId)?.importance ==
+            NotificationManager.IMPORTANCE_NONE
+        ) {
+            return false
+        }
+    }
+
+    // Check Android 13+ notification permission.
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (context.checkSelfPermission(
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return false
+        }
+    }
+
+    if (!manager.areNotificationsEnabled()) {
+        return false
+    }
+
+    val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        Notification.Builder(context, channelId)
+    } else {
+        Notification.Builder(context)
+    }
+
+    val notification = builder
+        .setSmallIcon(android.R.drawable.ic_dialog_info)
+        .setContentTitle("Smart Cafe · Order Update")
+        .setContentText("Order ${orderId.take(8)} is now $status")
+        .setAutoCancel(true)
+        .build()
+
+    return try {
+        manager.notify(orderId.hashCode(), notification)
+        true
+    } catch (e: SecurityException) {
+        false
+    }
+}
+
 
