@@ -61,4 +61,6 @@ dependencies {
     //Firebase SDK 版本管理清单？
     implementation("com.google.firebase:firebase-auth")
     //Firebase Authentication 加入项目
+    implementation("com.google.firebase:firebase-firestore")
+    //添加 Firestore SDK
 }
