@@ -42,13 +42,14 @@ Development Role: Customer**
    		5.Change the quantity of products or remove products from the shopping cart.
    		6.Confirm an order and receive order confirmation information.
    		7.View order history and current order status.
-   4.2 Functions not included in the current project:
+   4.2 Functions that were not originally planned for inclusion in this project but were identified as mandatory upon reviewing the assignment requirements:
    		1.Customers can give ratings for products and services after the service is finished.
    		2.Customers can receive notifications when their order status is updated.
-   		3.Show popular products based on sales data (this needs product sales or order data).
+    4.3 Functions that are definitely not included in this project:
+   		1.Show popular products based on sales data (this needs product sales or order data).
    	If development time is enough, these functions could be added in future versions.
 
-5. Requirements
+6. Requirements
    5.1 Functional Requirements
    FR-01	Customers can register an account using email and password.(Must)
    FR-02	Customers can login and logout securely.(Must)
@@ -57,15 +58,18 @@ Development Role: Customer**
    FR-05	Customers can submit orders and receive order confirmation information.(Must)
    FR-06	Customers can view order history and current order status.(Must)
    FR-07	Customers can search or filter menu products.(Should)
-   FR-08	Customers can submit ratings and text reviews.(Could)
+   FR-08	Customers can submit ratings and text reviews for completed orders.(Could)
+   FR-09 	Customers can receive local notifications when their order status changes while the application is actively monitoring orders. (Could)
 		Priority Explanation:
 		Must: Core functions that must be completed in this project.
    		Should: Important functions that are planned to be developed, but have lower priority than Must functions.
    		Could: Extra functions that may be developed if there is enough time.
    5.2 Non-functional Requirements
-   		1.Security
-   		2.Easy to use
-   		3.Data completeness
+   		1. Security: User authentication and data access should be protected.
+		2. Usability: The application should provide a simple and clear ordering process.
+		3. Data Integrity: Order information, product quantities and total prices should be handled consistently.
+		4. Reliability: The application should provide appropriate loading indicators and error messages when authentication or database operations fail.
+		5. Privacy: Users should only be able to access their own personal order information.
 
 6. Data Requirements
    The project plans to use the following main data entities.
@@ -128,9 +132,41 @@ Development Role: Customer**
 			 2.The app displays order confirmation information.
 			 3.The order contains correct products, quantities and total price.
 			 4.If the order submission fails, the app should display a clear error message.
+   	AC-05: Order History
+   		Precondition: The customer has successfully logged in and has previously placed orders.
+   		Action: The customer opens the order history page.
+   		Expected Results:
+			1. The application displays the customer's previous orders.
+   			2. Each order displays its order ID, items, total price and status.
+			3. The application updates displayed order information when Firestore data changes.
+			4. If order information cannot be loaded, the application displays an appropriate error message.
+   	AC-06 — Order Reviews
+		Precondition: The customer has an order available for review.
+		Action: The customer submits a rating and optional text comment.
+		Expected Results:
+			1. The customer can select a rating between 1 and 5.
+			2. The customer can enter an optional text comment.
+			3. The application saves the review information to Firestore.
+			4. The application displays an error message if review submission fails.
+	AC-07 — Order Status Notifications
+		Precondition: The customer has granted notification permission and the application is actively monitoring order status changes.
+		Action: An order status changes.
+		Expected Results:
+			1. The application detects the order status change.
+			2. The application displays a local notification when notification permission is available.
+			3. The application handles unavailable notification permission appropriately.
+	AC-08 — Error Handling
+		Precondition: The application is performing an authentication or database operation.
+		Action: The operation fails because of invalid input, network problems or database errors.
+		Expected Results:
+			1. The application displays an appropriate error message.
+			2. Loading indicators are stopped after the operation finishes.
+			3. The application remains usable and does not crash because of the handled failure.
+			
 
-9. Version History
+11. Version History
 v1.0   28 October 2026   Created the initial Product Requirements Document.
+v1.1   22 November 2026  Updated functional requirements, project scope, data requirements and acceptance criteria based on the implemented application.
 
 
 
@@ -173,12 +209,13 @@ prd版本：v1.0
      5.修改购物车中的商品数量或移除商品
      6.确认订单并获得订单确认信息
      7.查看历史订单和当前订单状态
-   4-2.此项目暂时不包括的功能：
+   4-2.此项目本来不打算包括但是看完作业要求发现必须包括的功能：
      1.顾客可在服务结束后对商品和服务进行打分
      2.顾客可在订单状态更新时获取通知
-     3.根据商品销量向顾客展示销量较高的商品（需要商品销量或订单数据）
+   4-3.此项目真的不包括的功能：
+     1.根据商品销量向顾客展示销量较高的商品（需要商品销量或订单数据）
    如果开发时间允许，可以在后续版本中增加这些功能。
-5. 需求
+6. 需求
    5-1.功能需求(Requirements)
     编号	           功能需求	                        优先级
    FR-01	顾客可以使用邮箱和密码注册账户	                 Must
@@ -188,7 +225,7 @@ prd版本：v1.0
    FR-05	顾客可以提交订单并获得订单确认信息              Must
    FR-06	顾客可以查看历史订单和当前订单状态              Must
    FR-07	顾客可以搜索或筛选菜单商品                     Should
-   FR-08	顾客可以提交评分和文字评价                     Could
+   FR-08	顾客可以为已经完成的订单提交评分和文字评价       Chould
    优先级说明：
     Must： 项目必须实现的核心功能
     Should： 重要功能，计划实现，但优先级低于核心功能
@@ -261,6 +298,7 @@ prd版本：v1.0
    		如果订单提交失败，应用显示明确的错误信息  
 9. 版本记录
 V1.0	  2026年10月28日	   创建初始产品需求文档
+v1.1      2026年11月22日		根据已实施的应用程序更新了功能需求、项目范围、数据要求和验收标准
 
 
 
